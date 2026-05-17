@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title th:text="${stavka.stavkaId == null} ? 'Nova stavka' : 'Uredi stavku'"></title>
+    <link rel="stylesheet" th:href="@{/css/style.css}"/>
+</head>
+<body>
+<div th:replace="~{fragments/nav :: nav}"></div>
+
+<div class="sadrzaj">
+
+    <h1 th:text="${stavka.stavkaId == null} ? 'Nova stavka' : 'Uredi stavku'"></h1>
+
+    <div th:if="${greska}" th:text="${greska}" class="greska"></div>
+
+    <form th:action="${stavka.stavkaId == null}
+                    ? @{/narudzbe/{id}/stavke(id=${narudzbaId})}
+                    : @{/narudzbe/{nId}/stavke/{sId}(nId=${narudzbaId}, sId=${stavka.stavkaId})}"
+          th:object="${stavka}"
+          method="post">
+
+        <div>
+            <label for="vrstaRubljaId">Vrsta rublja</label>
+            <select id="vrstaRubljaId" th:field="*{vrstaRubljaId}">
+                <option value="">-- Odaberi vrstu rublja --</option>
+                <option th:each="vrsta : ${vrsteRublja}"
+                        th:value="${vrsta.vrstaRubljaId}"
+                        th:text="${vrsta.naziv}">
+                </option>
+            </select>
+            <span th:if="${#fields.hasErrors('vrstaRubljaId')}"
+                  th:errors="*{vrstaRubljaId}" class="pogreska-polja">
+        </span>
+        </div>
+
+        <div>
+            <label for="kolicina">Količina (kg)</label>
+            <input type="number"
+                   id="kolicina"
+                   step="0.1"
+                   min="0.1"
+                   th:field="*{kolicina}"/>
+            <span th:if="${#fields.hasErrors('kolicina')}"
+                  th:errors="*{kolicina}" class="pogreska-polja">
+        </span>
+        </div>
+
+        <button type="submit">Spremi</button>
+
+        <a th:href="@{/narudzbe/{id}(id=${narudzbaId})}" class="gumb-odustani">Odustani</a>
+
+    </form>
+
+</div>
+</body>
+</html>

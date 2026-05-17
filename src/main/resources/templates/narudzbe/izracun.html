@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Odabir obrta</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}"/>
+</head>
+<body>
+
+<div th:replace="~{fragments/nav :: nav}"></div>
+
+<div class="sadrzaj">
+
+    <h1>Odabir obrta</h1>
+    <p>Odaberite obrt koji ce obaviti uslugu glacanja.</p>
+
+    <form th:action="@{/narudzbe/potvrdi}"
+          th:object="${narudzba}"
+          method="post">
+
+        <input type="hidden" th:field="*{korisnickoIme}"/>
+        <input type="hidden" th:field="*{adresaId}"/>
+        <input type="hidden" th:field="*{terminPrikupa}"/>
+
+        <th:block th:each="stavka, stat : *{stavke}">
+            <input type="hidden"
+                   th:name="'stavke[' + ${stat.index} + '].vrstaRubljaId'"
+                   th:value="${stavka.vrstaRubljaId}"/>
+            <input type="hidden"
+                   th:name="'stavke[' + ${stat.index} + '].kolicina'"
+                   th:value="${stavka.kolicina}"/>
+        </th:block>
+
+        <h2>Sazetak narudzbe</h2>
+        <p>
+            <strong>Korisnik:</strong>
+            <span th:text="*{korisnickoIme}"></span>
+        </p>
+        <p>
+            <strong>Termin prikupa:</strong>
+            <span th:text="${#temporals.format(narudzba.terminPrikupa, 'dd.MM.yyyy.')}"></span>
+        </p>
+
+        <h3>Odabrane stavke:</h3>
+        <table>
+            <thead>
+            <tr>
+                <th>#</th>
+                <th>Vrsta rublja</th>
+                <th>Kolicina (kg)</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="stavka, stat : *{stavke}">
+                <td th:text="${stat.count}"></td>
+                <td>
+                <span th:each="vrsta : ${vrsteRublja}"
+                      th:if="${vrsta.vrstaRubljaId == stavka.vrstaRubljaId}"
+                      th:text="${vrsta.naziv}">
+                    </span>
+                </td>
+                <td th:text="${stavka.kolicina}"></td>
+            </tr>
+            </tbody>
+        </table>
+
+        <hr/>
+
+        <h2>Dostupni obrti</h2>
+
+        <table>
+            <thead>
+            <tr>
+                <th>Obrt</th>
+                <th>Ukupna cijena</th>
+                <th>Odabir</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="obrt : ${obrtiSCijenama}">
+                <td th:text="${obrt.naziv}"></td>
+                <td>
+                    <span th:if="${obrt.dostupan}"
+                          th:text="${#numbers.formatDecimal(obrt.ukupniIznos, 1, 2)} + ' EUR'">
+                    </span>
+                    <span th:unless="${obrt.dostupan}"
+                          th:text="${obrt.razlogNedostupnosti}"
+                          style="color:red">
+                    </span>
+                </td>
+                <td>
+                    <button type="submit"
+                            th:if="${obrt.dostupan}"
+                            th:name="obrtIban"
+                            th:value="${obrt.iban}">
+                        Odaberi
+                    </button>
+                    <span th:unless="${obrt.dostupan}">—</span>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+
+        <hr/>
+        <a th:href="@{/narudzbe/nova}">Nazad na unos</a>
+
+    </form>
+
+</div>
+
+</body>
+</html>

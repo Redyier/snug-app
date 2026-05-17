@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Nova narudžba</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}"/>
+</head>
+<body>
+<div th:replace="~{fragments/nav :: nav}"></div>
+
+<div class="sadrzaj">
+
+    <h1>Nova narudžba</h1>
+
+    <form th:action="@{/narudzbe}"
+          th:object="${narudzba}"
+          method="post">
+
+        <div>
+            <label for="korisnickoIme">Korisnik</label>
+            <select id="korisnickoIme" th:field="*{korisnickoIme}">
+                <option value="">-- Odaberi korisnika --</option>
+                <option th:each="osoba : ${privatneOsobe}"
+                        th:value="${osoba.korisnickoIme}"
+                        th:text="${osoba.korisnickoIme + ' (' + osoba.ime + ' ' + osoba.prezime + ')'}">
+                </option>
+            </select>
+            <span th:if="${#fields.hasErrors('korisnickoIme')}"
+                  th:errors="*{korisnickoIme}" class="pogreska-polja">
+        </span>
+        </div>
+
+        <div>
+            <label for="obrtIban">Obrt</label>
+            <select id="obrtIban" th:field="*{obrtIban}">
+                <option value="">-- Odaberi obrt --</option>
+                <option th:each="obrt : ${obrти}"
+                        th:value="${obrt.iban}"
+                        th:text="${obrt.naziv}">
+                </option>
+            </select>
+            <span th:if="${#fields.hasErrors('obrtIban')}"
+                  th:errors="*{obrtIban}" class="pogreska-polja">
+        </span>
+        </div>
+
+        <div>
+            <label for="adresaId">Adresa prikupa</label>
+            <select id="adresaId" th:field="*{adresaId}">
+                <option value="">-- Odaberi adresu --</option>
+                <option th:each="adresa : ${adrese}"
+                        th:value="${adresa.adresaId}"
+                        th:text="${adresa.punaAdresa}">
+                </option>
+            </select>
+            <span th:if="${#fields.hasErrors('adresaId')}"
+                  th:errors="*{adresaId}" class="pogreska-polja">
+        </span>
+        </div>
+
+        <div>
+            <label for="terminPrikupa">Termin prikupa</label>
+            <input type="date"
+                   id="terminPrikupa"
+                   th:field="*{terminPrikupa}"/>
+            <span th:if="${#fields.hasErrors('terminPrikupa')}"
+                  th:errors="*{terminPrikupa}" class="pogreska-polja">
+        </span>
+        </div>
+
+        <button type="submit">Spremi</button>
+        <a th:href="@{/narudzbe}" class="gumb-odustani">Odustani</a>
+
+    </form>
+
+</div>
+
+</body>
+</html>
