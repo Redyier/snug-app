@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Vrste rublja</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}"/>
+</head>
+<body>
+<div th:replace="~{fragments/nav :: nav}"></div>
+
+<div class="sadrzaj">
+
+    <h1>Vrste rublja</h1>
+
+    <div th:if="${uspjeh}" th:text="${uspjeh}" class="uspjeh"></div>
+
+    <form method="get" th:action="@{/vrste-rublja}">
+        <input type="text" name="search" placeholder="Pretraži..." th:value="${search}"/>
+        <button type="submit">Traži</button>
+        <a th:href="@{/vrste-rublja}" class="obrisi">Poništi</a>
+    </form>
+
+    <a th:href="@{/vrste-rublja/nova}" class="gumb">Dodaj novu vrsta rublja</a>
+
+    <table>
+        <thead>
+        <tr>
+            <th>#</th>
+            <th>Naziv</th>
+            <th>Akcije</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:if="${#lists.isEmpty(vrste)}">
+            <td colspan="3">Nema podataka.</td>
+        </tr>
+        <tr th:each="vrsta, stat : ${vrste}">
+            <td th:text="${stat.count}"></td>
+            <td th:text="${vrsta.naziv}"></td>
+            <td>
+                <a th:href="@{/vrste-rublja/{id}/uredi(id=${vrsta.vrstaRubljaId})}" class="gumb-mali">Uredi</a>
+
+                <form th:action="@{/vrste-rublja/{id}/obrisi(id=${vrsta.vrstaRubljaId})}"
+                      method="post"
+                      style="display:inline"
+                      onsubmit="return confirm('Jeste li sigurni?')">
+                    <button type="submit" class="obrisi">Obriši</button>
+                </form>
+            </td>
+        </tr>
+        </tbody>
+    </table>
+
+</div>
+
+</body>
+</html>

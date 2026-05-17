@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Narudžba</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}"/>
+</head>
+<body>
+<div th:replace="~{fragments/nav :: nav}"></div>
+
+<div class="sadrzaj">
+
+    <a th:href="@{/narudzbe}" class="obrisi">Povratak na popis</a>
+
+    <div th:if="${uspjeh}" th:text="${uspjeh}" class="uspjeh"></div>
+
+    <div th:if="${greska}" th:text="${greska}" class="greska<p>ObrtIban iz DTO-a: <span th:text="${narudzba.obrtIban}"></span></p>"></div>
+
+    <h1>Narudžba</h1>
+
+    <form th:action="@{/narudzbe/{id}(id=${narudzba.narudzbaId})}"
+          th:object="${narudzba}"
+          method="post">
+
+        <div>
+            <label for="korisnickoIme">Korisnik</label>
+            <select id="korisnickoIme" th:field="*{korisnickoIme}">
+                <option value="">-- Odaberi korisnika --</option>
+                <option th:each="osoba : ${privatneOsobe}"
+                        th:value="${osoba.korisnickoIme}"
+                        th:text="${osoba.korisnickoIme + ' (' + osoba.ime + ' ' + osoba.prezime + ')'}">
+                </option>
+            </select>
+            <span th:if="${#fields.hasErrors('korisnickoIme')}"
+                  th:errors="*{korisnickoIme}" class="pogreska-polja">
+        </span>
+        </div>
+
+        <div>
+            <label for="obrtIban">Obrt</label>
+            <select id="obrtIban" th:name="obrtIban">
+                <option value="">-- Odaberi obrt --</option>
+                <option th:each="obrt : ${obrti}"
+                        th:value="${obrt.iban}"
+                        th:selected="${obrt.iban == narudzba.obrtIban}"
+                        th:text="${obrt.naziv}">
+                </option>
+            </select>
+            <span th:if="${#fields.hasErrors('obrtIban')}"
+                  th:errors="*{obrtIban}" class="pogreska-polja">
+        </span>
+        </div>
+
+        <div>
+            <label for="adresaId">Adresa prikupa</label>
+            <select id="adresaId" th:field="*{adresaId}">
+                <option value="">-- Odaberi adresu --</option>
+                <option th:each="adresa : ${adrese}"
+                        th:value="${adresa.adresaId}"
+                        th:text="${adresa.punaAdresa}">
+                </option>
+            </select>
+            <span th:if="${#fields.hasErrors('adresaId')}"
+                  th:errors="*{adresaId}" class="pogreska-polja">
+        </span>
+        </div>
+
+        <div>
+            <label for="terminPrikupa">Termin prikupa</label>
+            <input type="date"
+                   id="terminPrikupa"
+                   th:name="terminPrikupa"
+                   th:value="${#temporals.format(narudzba.terminPrikupa, 'yyyy-MM-dd')}"/>
+            <span th:if="${#fields.hasErrors('terminPrikupa')}"
+                  th:errors="*{terminPrikupa}" class="pogreska-polja">
+        </span>
+        </div>
+
+        <div>
+            <label>Ukupni iznos</label>
+            <span th:text="${narudzba.ukupniIznos}"></span>
+        </div>
+
+        <button type="submit">Spremi izmjene</button>
+
+        <form th:action="@{/narudzbe/{id}/obrisi(id=${narudzba.narudzbaId})}"
+              method="post"
+              style="display:inline"
+              onsubmit="return confirm('Jeste li sigurni da želite obrisati narudžbu?')">
+            <button type="submit" class="obrisi">Obriši narudžbu</button>
+        </form>
+
+    </form>
+
+    <hr/>
+
+    <h2>Stavke narudžbe</h2>
+
+    <table>
+        <thead>
+        <tr>
+            <th>#</th>
+            <th>Vrsta rublja</th>
+            <th>Količina (kg)</th>
+            <th>Akcije</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:if="${#lists.isEmpty(stavke)}">
+            <td colspan="4">Nema stavki.</td>
+        </tr>
+        <tr th:each="stavka, stat : ${stavke}">
+            <td th:text="${stat.count}"></td>
+            <td th:text="${stavka.getVrstaRubljaNaziv}"></td>
+            <td th:text="${stavka.kolicina}"></td>
+            <td>
+                <a th:href="@{/narudzbe/{nId}/stavke/{sId}/uredi(nId=${narudzba.narudzbaId}, sId=${stavka.stavkaId})}" class="gumb-mali">
+                    Uredi
+                </a>
+
+                <form th:action="@{/narudzbe/{nId}/stavke/{sId}/obrisi(nId=${narudzba.narudzbaId}, sId=${stavka.stavkaId})}"
+                      method="post"
+                      style="display:inline"
+                      onsubmit="return confirm('Jeste li sigurni?')">
+                    <button type="submit" class="obrisi">Obriši</button>
+                </form>
+            </td>
+        </tr>
+        </tbody>
+    </table>
+
+    <a th:href="@{/narudzbe/{id}/stavke/nova(id=${narudzba.narudzbaId})}" class="gumb">
+        Dodaj stavku
+    </a>
+
+    <hr/>
+
+    <h2>Status narudžbe</h2>
+
+    <div>
+        <strong>Trenutni status: </strong>
+        <span th:if="${trenutniStatus != null}"
+              th:text="${trenutniStatus.nazivStatusa}">
+    </span>
+        <span th:if="${trenutniStatus == null}">
+        Nije postavljeno
+    </span>
+    </div>
+
+    <h3>Povijest statusa</h3>
+    <table>
+        <thead>
+        <tr>
+            <th>#</th>
+            <th>Status</th>
+            <th>Vrijeme ažuriranja</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:if="${#lists.isEmpty(statusi)}">
+            <td colspan="3">Nema statusa.</td>
+        </tr>
+        <tr th:each="status, stat : ${statusi}">
+            <td th:text="${stat.count}"></td>
+            <td th:text="${status.nazivStatusa}"></td>
+            <td th:text="${status.vrijemeAzuriranja}"></td>
+        </tr>
+        </tbody>
+    </table>
+
+    <h3>Dodaj novi status</h3>
+
+    <div th:if="${#lists.isEmpty(dostupniStatusi)}">
+        <p>Narudžba završena.</p>
+    </div>
+
+    <form th:if="${!#lists.isEmpty(dostupniStatusi)}"
+          th:action="@{/narudzbe/{id}/statusi(id=${narudzba.narudzbaId})}"
+          method="post">
+
+        <div>
+            <label for="nazivStatusa">Novi status</label>
+            <select id="nazivStatusa" name="nazivStatusa">
+                <option value="">-- Odaberi status --</option>
+                <option th:each="s : ${dostupniStatusi}"
+                        th:value="${s.naziv}"
+                        th:text="${s.naziv}">
+                </option>
+            </select>
+        </div>
+
+        <button type="submit">Dodaj status</button>
+
+    </form>
+
+</div>
+
+</body>
+</html>

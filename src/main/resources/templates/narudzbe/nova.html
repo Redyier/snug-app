@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Nova narudžba</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}"/>
+</head>
+<body>
+
+<div th:replace="~{fragments/nav :: nav}"></div>
+
+<div class="sadrzaj">
+
+    <h1>Nova narudžba</h1>
+
+    <div th:if="${greska}" th:text="${greska}" class="greska"></div>
+
+    <form th:action="@{/narudzbe/pretraga}"
+          th:object="${narudzba}"
+          method="post">
+
+        <div>
+            <label for="korisnickoIme">Korisnik</label>
+            <select id="korisnickoIme" th:field="*{korisnickoIme}">
+                <option value="">-- Odaberi korisnika --</option>
+                <option th:each="osoba : ${privatneOsobe}"
+                        th:value="${osoba.korisnickoIme}"
+                        th:text="${osoba.korisnickoIme + ' (' + osoba.ime + ' ' + osoba.prezime + ')'}">
+                </option>
+            </select>
+            <span th:if="${#fields.hasErrors('korisnickoIme')}"
+                  th:errors="*{korisnickoIme}" class="pogreska-polja"></span>
+        </div>
+
+        <div>
+            <label for="adresaId">Adresa prikupa</label>
+            <select id="adresaId" th:field="*{adresaId}">
+                <option value="">-- Odaberi adresu --</option>
+                <option th:each="adresa : ${adrese}"
+                        th:value="${adresa.adresaId}"
+                        th:text="${adresa.punaAdresa}">
+                </option>
+            </select>
+            <span th:if="${#fields.hasErrors('adresaId')}"
+                  th:errors="*{adresaId}" class="pogreska-polja"></span>
+        </div>
+
+        <div>
+            <label for="terminPrikupa">Termin prikupa</label>
+            <input type="date"
+                   id="terminPrikupa"
+                   th:name="terminPrikupa"
+                   th:value="${#temporals.format(narudzba.terminPrikupa, 'yyyy-MM-dd')}"/>
+            <span th:if="${#fields.hasErrors('terminPrikupa')}"
+                  th:errors="*{terminPrikupa}" class="pogreska-polja"></span>
+        </div>
+
+        <hr/>
+
+        <h2>Stavke</h2>
+        <span th:if="${#fields.hasErrors('stavke')}"
+              th:errors="*{stavke}" class="pogreska-polja"></span>
+
+        <table id="stavke-tablica">
+            <thead>
+            <tr>
+                <th>#</th>
+                <th>Vrsta rublja</th>
+                <th>Količina (kg)</th>
+                <th></th>
+            </tr>
+            </thead>
+            <tbody id="stavke-body">
+            <tr th:each="stavka, stat : *{stavke}"
+                th:id="'stavka-' + ${stat.index}">
+                <td th:text="${stat.count}"></td>
+                <td>
+                    <select th:name="'stavke[' + ${stat.index} + '].vrstaRubljaId'">
+                        <option value="">-- Odaberi --</option>
+                        <option th:each="vrsta : ${vrsteRublja}"
+                                th:value="${vrsta.vrstaRubljaId}"
+                                th:selected="${vrsta.vrstaRubljaId == stavka.vrstaRubljaId}"
+                                th:text="${vrsta.naziv}">
+                        </option>
+                    </select>
+                </td>
+                <td>
+                    <input type="number"
+                           th:name="'stavke[' + ${stat.index} + '].kolicina'"
+                           th:value="${stavka.kolicina}"
+                           step="0.1"
+                           min="0.1"
+                           placeholder="kg"/>
+                </td>
+                <td>
+                    <button type="button" onclick="ukloniStavku(this)">Ukloni</button>
+                </td>
+            </tr>
+            </tbody>
+
+            <select id="vrsta-rublja-template" style="display:none">
+                <option value="">-- Odaberi --</option>
+                <option th:each="vrsta : ${vrsteRublja}"
+                        th:value="${vrsta.vrstaRubljaId}"
+                        th:text="${vrsta.naziv}">
+                </option>
+            </select>
+        </table>
+
+        <button type="button" onclick="dodajStavku()">+ Dodaj stavku</button>
+
+        <hr/>
+
+        <button type="submit">Izračunaj cijene</button>
+        <a th:href="@{/narudzbe}" class="gumb-odustani">Odustani</a>
+
+    </form>
+
+</div>
+
+<script>
+    let brojStavki = document.getElementById('stavke-body').rows.length;
+
+    function dodajStavku() {
+        const tbody = document.getElementById('stavke-body');
+        const index = brojStavki;
+
+        const templateSelect = document.getElementById('vrsta-rublja-template');
+        const noviSelect = templateSelect.cloneNode(true);
+        noviSelect.id = '';
+        noviSelect.style.display = '';
+        noviSelect.name = `stavke[${index}].vrstaRubljaId`;
+
+        const tr = document.createElement('tr');
+        tr.id = 'stavka-' + index;
+
+        const td1 = document.createElement('td');
+        td1.textContent = index + 1;
+
+        const td2 = document.createElement('td');
+        td2.appendChild(noviSelect);
+
+        const td3 = document.createElement('td');
+        const input = document.createElement('input');
+        input.type = 'number';
+        input.name = `stavke[${index}].kolicina`;
+        input.step = '0.1';
+        input.min = '0.1';
+        input.placeholder = 'kg';
+        td3.appendChild(input);
+
+        const td4 = document.createElement('td');
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.textContent = 'Ukloni';
+        btn.onclick = function() { ukloniStavku(this); };
+        td4.appendChild(btn);
+
+        tr.appendChild(td1);
+        tr.appendChild(td2);
+        tr.appendChild(td3);
+        tr.appendChild(td4);
+
+        tbody.appendChild(tr);
+        brojStavki++;
+    }
+
+    function ukloniStavku(gumb) {
+        const tbody = document.getElementById('stavke-body');
+        if (tbody.rows.length <= 1) {
+            alert('Morate imati barem jednu stavku.');
+            return;
+        }
+        gumb.closest('tr').remove();
+    }
+</script>
+
+</body>
+</html>

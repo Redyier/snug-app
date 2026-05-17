@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Narudžbe</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}"/>
+</head>
+<body>
+<div th:replace="~{fragments/nav :: nav}"></div>
+<div class="sadrzaj">
+    <h1>Narudžbe</h1>
+
+    <div th:if="${uspjeh}" th:text="${uspjeh}" class="uspjeh"></div>
+
+    <form method="get" th:action="@{/narudzbe}" class="forma-pretrage">
+        <input type="text"
+               name="search"
+               placeholder="Pretraži po korisniku..."
+               th:value="${search}"/>
+        <button type="submit">Traži</button>
+        <a th:href="@{/narudzbe}" class="obrisi">Poništi</a>
+    </form>
+
+    <a th:href="@{/narudzbe/nova}" class="gumb">Nova narudžba</a>
+
+    <table>
+        <thead>
+        <tr>
+            <th>#</th>
+            <th>Datum naručivanja</th>
+            <th>Termin prikupa</th>
+            <th>Korisnik</th>
+            <th>Obrt</th>
+            <th>Ukupni iznos</th>
+            <th>Status</th>
+            <th>Akcije</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:if="${#lists.isEmpty(narudzbe)}">
+            <td colspan="7">Nema narudžbi.</td>
+        </tr>
+        <tr th:each="narudzba, stat : ${narudzbe}">
+            <td th:text="${stat.count}"></td>
+            <td th:text="${narudzba.datumNarucivanja}"></td>
+            <td th:text="${narudzba.terminPrikupa}"></td>
+            <td th:text="${narudzba.korisnickoIme}"></td>
+            <td th:text="${narudzba.obrtNaziv}"></td>
+            <td th:text="${narudzba.ukupniIznos}"></td>
+            <td th:text="${narudzba.trenutniStatus}"></td>
+            <td>
+                <div class="akcije-td">
+                    <a th:href="@{/narudzbe/{id}(id=${narudzba.narudzbaId})}" class="gumb-mali">Otvori</a>
+                    <form th:action="@{/narudzbe/{id}/obrisi(id=${narudzba.narudzbaId})}"
+                          method="post"
+                          onsubmit="return confirm('Jeste li sigurni?')">
+                        <button type="submit" class="obrisi">Obrisi</button>
+                    </form>
+                </div>
+            </td>
+        </tr>
+        </tbody>
+    </table>
+</div>
+</body>
+</html>

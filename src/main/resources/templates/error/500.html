@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Greška</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}"/>
+</head>
+<body>
+
+<div th:replace="~{fragments/nav :: nav}"></div>
+
+<h1>500 - Došlo je do greške</h1>
+<p th:text="${poruka}">Dogodila se neočekivana greška.</p>
+
+</body>
+</html>

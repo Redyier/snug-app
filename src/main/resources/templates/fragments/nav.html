@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <link rel="stylesheet" th:href="@{/css/style.css}"/>
+</head>
+<body>
+
+<nav th:fragment="navigacija">
+    <a th:href="@{/}">Početna</a>
+    |
+    <a th:href="@{/narudzbe}">Narudžbe</a>
+    |
+    <a th:href="@{/vrste-rublja}">Vrste rublja</a>
+    <hr/>
+</nav>
+
+</body>
+</html>

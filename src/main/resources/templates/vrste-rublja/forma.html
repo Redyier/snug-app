@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title th:text="${vrstaRublja.vrstaRubljaId == null} ? 'Nova vrsta rublja' : 'Uredi vrstu rublja'"></title>
+    <link rel="stylesheet" th:href="@{/css/style.css}"/>
+</head>
+<body>
+<div th:replace="~{fragments/nav :: nav}"></div>
+
+<div class="sadrzaj">
+    <h1 th:text="${vrstaRublja.vrstaRubljaId == null} ? 'Nova vrsta rublja' : 'Uredi vrstu rublja'"></h1>
+
+    <form th:action="${vrstaRublja.vrstaRubljaId == null}
+                    ? @{/vrste-rublja}
+                    : @{/vrste-rublja/{id}(id=${vrstaRublja.vrstaRubljaId})}"
+          th:object="${vrstaRublja}"
+          method="post">
+
+        <div>
+            <label for="naziv">Naziv</label>
+            <input type="text"
+                   id="naziv"
+                   th:field="*{naziv}"/>
+            <span th:if="${#fields.hasErrors('naziv')}"
+                  th:errors="*{naziv}" class="pogreska-polja">
+        </span>
+        </div>
+
+        <button type="submit">Spremi</button>
+        <a th:href="@{/vrste-rublja}" class="gumb-odustani">Odustani</a>
+
+    </form>
+
+</div>
+
+</body>
+</html>
