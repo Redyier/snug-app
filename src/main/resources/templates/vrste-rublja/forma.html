@@ -11,6 +11,8 @@
 <div class="sadrzaj">
     <h1 th:text="${vrstaRublja.vrstaRubljaId == null} ? 'Nova vrsta rublja' : 'Uredi vrstu rublja'"></h1>
 
+    <div th:if="${greska}" th:text="${greska}" class="greska"></div>
+
     <form th:action="${vrstaRublja.vrstaRubljaId == null}
                     ? @{/vrste-rublja}
                     : @{/vrste-rublja/{id}(id=${vrstaRublja.vrstaRubljaId})}"

@@ -1,6 +1,7 @@
 package com.fer.backend.controller;
 
 import com.fer.backend.dto.VrstaRubljaDto;
+import com.fer.backend.exception.ValidationException;
 import com.fer.backend.service.VrstaRubljaService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -33,14 +34,21 @@ public class VrstaRubljaController {
     }
 
     @PostMapping
-    public String spremi(@Valid @ModelAttribute("vrstaRublja") VrstaRubljaDto dto, BindingResult result, RedirectAttributes redirectAttributes) {
+    public String spremi(@Valid @ModelAttribute("vrstaRublja") VrstaRubljaDto dto, BindingResult result, RedirectAttributes redirectAttributes, Model model) {
         if (result.hasErrors()) {
             return "vrste-rublja/forma";
         }
 
-        vrstaRubljaService.spremi(dto);
-        redirectAttributes.addFlashAttribute("uspjeh", "Vrsta rublja uspješno dodana.");
-        return "redirect:/vrste-rublja";
+        try {
+            vrstaRubljaService.spremi(dto);
+            redirectAttributes.addFlashAttribute("uspjeh", "Vrsta rublja uspješno dodana.");
+            return "redirect:/vrste-rublja";
+        }
+
+        catch (ValidationException e) {
+            model.addAttribute("greska", e.getMessage());
+            return "vrste-rublja/forma";
+        }
     }
 
     @GetMapping("/{id}/uredi")
@@ -50,14 +58,21 @@ public class VrstaRubljaController {
     }
 
     @PostMapping("/{id}")
-    public String azuriraj(@PathVariable UUID id, @Valid @ModelAttribute("vrstaRublja") VrstaRubljaDto dto, BindingResult result, RedirectAttributes redirectAttributes) {
+    public String azuriraj(@PathVariable UUID id, @Valid @ModelAttribute("vrstaRublja") VrstaRubljaDto dto, BindingResult result, RedirectAttributes redirectAttributes, Model model) {
         if (result.hasErrors()) {
             return "vrste-rublja/forma";
         }
 
-        vrstaRubljaService.azuriraj(id, dto);
-        redirectAttributes.addFlashAttribute("uspjeh", "Vrsta rublja uspješno ažurirana.");
-        return "redirect:/vrste-rublja";
+        try {
+            vrstaRubljaService.azuriraj(id, dto);
+            redirectAttributes.addFlashAttribute("uspjeh", "Vrsta rublja uspješno azurirana.");
+            return "redirect:/vrste-rublja";
+        }
+
+        catch (ValidationException e) {
+            model.addAttribute("greska", e.getMessage());
+            return "vrste-rublja/forma";
+        }
     }
 
     @PostMapping("/{id}/obrisi")

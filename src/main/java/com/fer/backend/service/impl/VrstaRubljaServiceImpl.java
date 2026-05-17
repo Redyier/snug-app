@@ -2,6 +2,7 @@ package com.fer.backend.service.impl;
 
 import com.fer.backend.dto.VrstaRubljaDto;
 import com.fer.backend.exception.EntityNotFoundException;
+import com.fer.backend.exception.ValidationException;
 import com.fer.backend.model.VrstaRublja;
 import com.fer.backend.repository.VrstaRubljaRepository;
 import com.fer.backend.service.VrstaRubljaService;
@@ -50,6 +51,11 @@ public class VrstaRubljaServiceImpl implements VrstaRubljaService {
 
     @Override
     public void spremi(VrstaRubljaDto dto) {
+
+        if (vrstaRubljaRepository.existsByNaziv(dto.getNaziv())) {
+            throw new ValidationException("Vrsta rublja s nazivom '" + dto.getNaziv() + "' već postoji.");
+        }
+
         VrstaRublja vrstaRublja = VrstaRublja.builder()
                 .naziv(dto.getNaziv())
                 .build();
@@ -58,6 +64,11 @@ public class VrstaRubljaServiceImpl implements VrstaRubljaService {
 
     @Override
     public void azuriraj(UUID id, VrstaRubljaDto dto) {
+
+        if (vrstaRubljaRepository.existsByNaziv(dto.getNaziv())) {
+            throw new ValidationException("Vrsta rublja s nazivom '" + dto.getNaziv() + "' već postoji.");
+        }
+
         VrstaRublja vrstaRublja = vrstaRubljaRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Vrsta rublja s ID-om " + id + " nije pronađena."));
         vrstaRublja.setNaziv(dto.getNaziv());
